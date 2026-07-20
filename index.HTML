@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexandre &amp; Juliana — Confirme sua presença</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <section class="hero">
+        <div class="eyebrow">Vamos nos casar</div>
+        <h1 class="monogram">Alexandre<span class="amp">&amp;</span>Juliana</h1>
+        <p class="subtitle">Com carinho, convidamos você para celebrar esse dia com a gente</p>
+        <div class="divider"></div>
+
+        <div class="details">
+            <div class="detail-item">
+                <div class="detail-label">Data</div>
+                <div class="detail-value">22 de outubro de 2026</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Local</div>
+                <div class="detail-value"><a
+                        href="https://www.google.com/maps/place/Conj.+Hab.+Augusto+Severo+-+Ac.+Publico,+685+-+Santos+Reis,+Parnamirim+-+RN,+59141-005/@-5.9177163,-35.2688915,17z/data=!3m1!4b1!4m6!3m5!1s0x7b2570f1ac91cef:0x37aef135be450caa!8m2!3d-5.9177163!4d-35.2663166!16s%2Fg%2F11bc8z9vrx?entry=ttu&g_ep=EgoyMDI2MDcxNS4wIKXMDSoASAFQAw%3D%3D"
+                        target="_blank" rel="noopener noreferrer">CHAS</a> </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Horário</div>
+                <div class="detail-value">A confirmar</div>
+            </div>
+        </div>
+
+        <div class="countdown" id="countdown">
+            <div class="count-box">
+                <div class="count-num" id="cd-days">–</div>
+                <div class="count-label">dias</div>
+            </div>
+            <div class="count-box">
+                <div class="count-num" id="cd-hours">–</div>
+                <div class="count-label">horas</div>
+            </div>
+            <div class="count-box">
+                <div class="count-num" id="cd-min">–</div>
+                <div class="count-label">min</div>
+            </div>
+        </div>
+
+        <div class="scroll-cue">Role para confirmar presença ↓</div>
+    </section>
+
+    <div class="rsvp-wrap">
+        <div class="rsvp-card">
+
+            <div id="form-state">
+                <h2 class="rsvp-title">Confirme sua presença</h2>
+                <p class="rsvp-sub">Por favor, responda até 22 de setembro de 2026</p>
+
+                <form id="rsvp-form">
+                    <label for="nome">Nome completo</label>
+                    <input type="text" id="nome" placeholder="Seu nome" required>
+                    <div class="error-msg" id="err-nome">Por favor, preencha seu nome.</div>
+
+                    <label>Você vai comparecer?</label>
+                    <div class="radio-group">
+                        <label class="radio-option" id="opt-sim">
+                            <input type="radio" name="presenca" value="sim">Sim, estarei lá
+                        </label>
+                        <label class="radio-option" id="opt-nao">
+                            <input type="radio" name="presenca" value="nao">Não poderei ir
+                        </label>
+                    </div>
+                    <div class="error-msg" id="err-presenca">Selecione uma opção.</div>
+
+                    <div id="acompanhantes-wrap">
+                        <label for="acompanhantes">Quantas pessoas no total (incluindo você)?</label>
+                        <input type="number" id="acompanhantes" min="1" max="10" value="1">
+                    </div>
+
+                    <label for="mensagem">Deixe uma mensagem para os noivos (opcional)</label>
+                    <textarea id="mensagem" placeholder="Escreva aqui..."></textarea>
+
+                    <button type="submit" class="submit-btn">Enviar confirmação</button>
+                </form>
+            </div>
+
+            <div class="success-state" id="success-state">
+                <div class="success-mono">Obrigado! 🤍</div>
+                <p>Sua resposta foi registrada com carinho.<br>Alexandre e Juliana agradecem!</p>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-mono">Com amor, Alexandre &amp; Juliana</div>
+        <button class="organizer-toggle" id="organizer-toggle">Área do organizador</button>
+        <div class="organizer-panel" id="organizer-panel">
+            <div id="org-summary">Carregando respostas...</div>
+            <button id="export-btn">Baixar planilha (.xlsx)</button>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>
