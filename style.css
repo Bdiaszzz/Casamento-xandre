@@ -496,6 +496,167 @@ footer {
     background: var(--gold-deep);
 }
 
+/* ---------- ENHANCED ANIMATIONS ---------- */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+@keyframes confetti {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-40px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes successGlow {
+    0% { box-shadow: 0 20px 60px rgba(44, 38, 32, 0.08); }
+    50% { box-shadow: 0 20px 60px rgba(184, 146, 74, 0.2); }
+    100% { box-shadow: 0 20px 60px rgba(44, 38, 32, 0.08); }
+}
+
+/* Form entrance animation */
+#form-state {
+    animation: slideIn 0.6s ease-out;
+}
+
+/* Input validation styling */
+input[type="text"].valid,
+input[type="number"].valid {
+    border-bottom-color: #27A745 !important;
+}
+
+input[type="text"].invalid,
+input[type="number"].invalid {
+    border-bottom-color: #B24444 !important;
+}
+
+.success-state.show {
+    animation: slideIn 0.6s ease-out, successGlow 2s ease-in-out 0.6s;
+}
+
+.success-state.show .success-mono {
+    animation: pulse 0.6s ease-out;
+}
+
+/* Enhanced button styling */
+.submit-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.submit-btn:hover::before {
+    left: 100%;
+}
+
+.submit-btn.loading {
+    background: linear-gradient(135deg, var(--charcoal) 25%, var(--gold-deep) 25%, var(--gold-deep) 50%, var(--charcoal) 50%, var(--charcoal) 75%, var(--gold-deep) 75%, var(--gold-deep));
+    background-size: 20px 20px;
+    animation: shimmer 1s linear infinite;
+}
+
+.submit-btn.loading::after {
+    content: " enviando...";
+}
+
+/* Radio option enhancements */
+.radio-option {
+    position: relative;
+    overflow: hidden;
+}
+
+.radio-option::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.radio-option:hover {
+    box-shadow: 0 4px 12px rgba(184, 146, 74, 0.15);
+}
+
+.radio-option.selected::before {
+    transform: scaleX(1);
+    opacity: 0.08;
+}
+
+/* Organizer panel enhancements */
+.organizer-panel {
+    animation: slideIn 0.4s ease-out;
+}
+
+.organizer-panel button {
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(184, 146, 74, 0.2);
+}
+
+.organizer-panel button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(184, 146, 74, 0.3);
+}
+
+.organizer-panel button:active {
+    transform: translateY(0);
+}
+
+/* Tablet responsiveness */
+@media (max-width: 768px) and (min-width: 481px) {
+    .rsvp-card {
+        padding: 48px 36px;
+    }
+    
+    .countdown {
+        gap: 14px;
+    }
+    
+    .count-box {
+        width: 80px;
+        min-height: 80px;
+    }
+    
+    .count-num {
+        font-size: 28px;
+    }
+}
+
 @media(max-width:480px) {
     .hero {
         padding: 72px 18px 56px;
@@ -521,5 +682,14 @@ footer {
 
     .radio-group {
         flex-direction: column;
+    }
+    
+    .submit-btn {
+        font-size: 11px;
+        padding: 14px;
+    }
+    
+    .rsvp-title {
+        font-size: 26px;
     }
 }

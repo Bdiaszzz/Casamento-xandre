@@ -1,22 +1,120 @@
 // ---------- Countdown ----------
 const weddingDate = new Date("2026-10-22T00:00:00");
 const organizerPassword = "casamento2026";
-const spreadsheetWebhookUrl = ""; // Cole aqui a URL do Apps Script do Google Sheets
+const spreadsheetWebhookUrl =
+  new URLSearchParams(window.location.search).get("sheet") ||
+  "https://script.google.com/macros/s/AKfycbzBOkrm-5jtUmTO9CgMj_qpJj66IPSJPiH2veb7xdeuQP-QmnW3AEo7avYKgB_II-Rf/exec";
+
+function createStorageAdapter() {
+  if (
+    window.storage &&
+    typeof window.storage.set === "function" &&
+    typeof window.storage.get === "function" &&
+    typeof window.storage.list === "function"
+  ) {
+    return window.storage;
+  }
+
+  return {
+    async set(key, value) {
+      localStorage.setItem(key, value);
+      return true;
+    },
+    async get(key) {
+      const value = localStorage.getItem(key);
+      return value === null ? null : { value };
+    },
+    async list(prefix) {
+      const keys = Object.keys(localStorage)
+        .filter((itemKey) => itemKey.startsWith(prefix))
+        .sort();
+      return { keys };
+    },
+  };
+}
+
+const storage = createStorageAdapter();
 
 async function saveToSpreadsheet(entry) {
   if (!spreadsheetWebhookUrl) return false;
 
-  const response = await fetch(spreadsheetWebhookUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(entry),
-  });
+  try {
+    const response = await fetch(spreadsheetWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(entry),
+      mode: "cors",
+      redirect: "follow",
+    });
 
-  if (!response.ok) {
-    throw new Error(`Erro ao salvar na planilha: ${response.status}`);
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `Erro ao salvar na planilha: ${response.status} - ${text}`,
+      );
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Erro no envio para a planilha:", err);
+    throw err;
   }
+}
 
-  return true;
+function submitXHRFallback(entry) {
+  return new Promise((resolve) => {
+    const formData = new FormData();
+    formData.append("nome", entry.nome || "");
+    formData.append("presenca", entry.presenca || "");
+    formData.append("pessoas", entry.pessoas || "");
+    formData.append("mensagem", entry.mensagem || "");
+    formData.append("data_envio", entry.data_envio || "");
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", spreadsheetWebhookUrl, true);
+    xhr.onload = () => {
+      console.log("XHR POST success:", xhr.status, xhr.responseText);
+      resolve(true);
+    };
+    xhr.onerror = () => {
+      console.error("XHR POST error:", xhr.status, xhr.responseText);
+      resolve(true);
+    };
+    xhr.ontimeout = () => {
+      console.warn("XHR POST timeout");
+      resolve(true);
+    };
+    xhr.timeout = 15000;
+    try {
+      xhr.send(formData);
+    } catch (e) {
+      console.error("XHR send failed:", e);
+      resolve(true);
+    }
+  });
+}
+
+// ---------- Confetti effect ----------
+function createConfetti() {
+  const colors = ['#B8924A', '#8F6E33', '#2C2620', '#E4D9C4'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.position = 'fixed';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.top = '-10px';
+    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.borderRadius = '50%';
+    confetti.style.pointerEvents = 'none';
+    confetti.style.zIndex = '9999';
+    confetti.style.animation = `confetti ${Math.random() * 1 + 2}s ease-in forwards`;
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3000);
+  }
 }
 
 function updateCountdown() {
@@ -37,6 +135,32 @@ function updateCountdown() {
 }
 updateCountdown();
 setInterval(updateCountdown, 30000);
+
+// ---------- Real-time validation ----------
+const nomeInput = document.getElementById("nome");
+const acompInput = document.getElementById("acompanhantes");
+
+nomeInput.addEventListener("blur", () => {
+  if (nomeInput.value.trim()) {
+    nomeInput.classList.add("valid");
+    nomeInput.classList.remove("invalid");
+  }
+});
+
+nomeInput.addEventListener("input", () => {
+  if (nomeInput.value.trim()) {
+    nomeInput.classList.add("valid");
+    nomeInput.classList.remove("invalid");
+  } else {
+    nomeInput.classList.remove("valid");
+  }
+});
+
+acompInput.addEventListener("change", () => {
+  if (parseInt(acompInput.value) > 0) {
+    acompInput.classList.add("valid");
+  }
+});
 
 // ---------- Radio selection ----------
 const optSim = document.getElementById("opt-sim");
@@ -67,6 +191,7 @@ form.addEventListener("submit", async (e) => {
 
   if (!nome) {
     document.getElementById("err-nome").style.display = "block";
+    nomeInput.classList.add("invalid");
     valid = false;
   }
   if (!presencaEl) {
@@ -92,26 +217,47 @@ form.addEventListener("submit", async (e) => {
 
   const submitBtn = form.querySelector(".submit-btn");
   submitBtn.disabled = true;
-  submitBtn.textContent = "Enviando...";
+  submitBtn.classList.add("loading");
 
   try {
     const key =
       "rsvp:" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
-    await window.storage.set(key, JSON.stringify(entry), true);
+    await storage.set(key, JSON.stringify(entry), true);
 
     try {
       if (spreadsheetWebhookUrl) {
         await saveToSpreadsheet(entry);
       }
     } catch (sheetErr) {
-      console.warn("Resposta salva localmente, mas não foi possível enviar para a planilha:", sheetErr);
+      console.warn(
+        "saveToSpreadsheet falhou, tentando fallback XMLHttpRequest:",
+        sheetErr,
+      );
+      try {
+        await submitXHRFallback(entry);
+      } catch (fbErr) {
+        console.error("XHR fallback também falhou:", fbErr);
+      }
     }
 
+    // Trigger success with confetti
     document.getElementById("form-state").style.display = "none";
     document.getElementById("success-state").classList.add("show");
+    createConfetti();
+    
+    // Reset form for potential re-use
+    setTimeout(() => {
+      form.reset();
+      nomeInput.classList.remove("valid", "invalid");
+      acompInput.classList.remove("valid");
+      [optSim, optNao].forEach((o) => o.classList.remove("selected"));
+      acompWrap.classList.remove("open");
+    }, 1000);
+    
   } catch (err) {
     console.error("Erro ao salvar resposta:", err);
     submitBtn.disabled = false;
+    submitBtn.classList.remove("loading");
     submitBtn.textContent = "Enviar confirmação";
     alert(
       "Não foi possível enviar sua confirmação agora. Tente novamente em instantes.",
@@ -126,7 +272,7 @@ const orgSummary = document.getElementById("org-summary");
 
 async function loadResponses() {
   try {
-    const list = await window.storage.list("rsvp:", true);
+    const list = await storage.list("rsvp:", true);
     if (!list || !list.keys || list.keys.length === 0) {
       orgSummary.textContent = "Nenhuma resposta ainda.";
       return [];
@@ -134,7 +280,7 @@ async function loadResponses() {
     const entries = [];
     for (const key of list.keys) {
       try {
-        const res = await window.storage.get(key, true);
+        const res = await storage.get(key, true);
         if (res && res.value) {
           entries.push(JSON.parse(res.value));
         }
@@ -146,7 +292,7 @@ async function loadResponses() {
     const totalPessoas = entries
       .filter((e) => e.presenca === "Sim")
       .reduce((sum, e) => sum + (parseInt(e.pessoas) || 1), 0);
-    orgSummary.textContent = `${entries.length} resposta(s) — ${confirmados} confirmaram presença (${totalPessoas} pessoa(s) no total).`;
+    orgSummary.innerHTML = `<strong>${entries.length}</strong> resposta(s) — <strong>${confirmados}</strong> confirmaram presença (<strong>${totalPessoas}</strong> pessoa(s) no total).`;
     return entries;
   } catch (err) {
     console.error("Erro ao carregar respostas:", err);
