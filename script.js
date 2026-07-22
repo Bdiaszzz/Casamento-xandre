@@ -1,5 +1,24 @@
 // ---------- Countdown ----------
 const weddingDate = new Date("2026-10-22T00:00:00");
+const organizerPassword = "casamento2026";
+const spreadsheetWebhookUrl = ""; // Cole aqui a URL do Apps Script do Google Sheets
+
+async function saveToSpreadsheet(entry) {
+  if (!spreadsheetWebhookUrl) return false;
+
+  const response = await fetch(spreadsheetWebhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro ao salvar na planilha: ${response.status}`);
+  }
+
+  return true;
+}
+
 function updateCountdown() {
   const now = new Date();
   const diff = weddingDate - now;
@@ -80,6 +99,14 @@ form.addEventListener("submit", async (e) => {
       "rsvp:" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
     await window.storage.set(key, JSON.stringify(entry), true);
 
+    try {
+      if (spreadsheetWebhookUrl) {
+        await saveToSpreadsheet(entry);
+      }
+    } catch (sheetErr) {
+      console.warn("Resposta salva localmente, mas não foi possível enviar para a planilha:", sheetErr);
+    }
+
     document.getElementById("form-state").style.display = "none";
     document.getElementById("success-state").classList.add("show");
   } catch (err) {
@@ -129,6 +156,13 @@ async function loadResponses() {
 }
 
 orgToggle.addEventListener("click", async () => {
+  const password = prompt("Digite a senha para acessar a área do organizador:");
+  if (password !== organizerPassword) {
+    orgSummary.textContent = "Acesso restrito.";
+    orgPanel.classList.remove("open");
+    return;
+  }
+
   const willOpen = !orgPanel.classList.contains("open");
   orgPanel.classList.toggle("open");
   if (willOpen) {
