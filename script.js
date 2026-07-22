@@ -1,5 +1,5 @@
 // ---------- Countdown ----------
-const weddingDate = new Date("2026-10-22T00:00:00");
+const weddingDate = null;
 const organizerPassword = "casamento2026";
 const spreadsheetWebhookUrl =
   new URLSearchParams(window.location.search).get("sheet") ||
@@ -99,18 +99,19 @@ function submitXHRFallback(entry) {
 
 // ---------- Confetti effect ----------
 function createConfetti() {
-  const colors = ['#B8924A', '#8F6E33', '#2C2620', '#E4D9C4'];
+  const colors = ["#B8924A", "#8F6E33", "#2C2620", "#E4D9C4"];
   for (let i = 0; i < 50; i++) {
-    const confetti = document.createElement('div');
-    confetti.style.position = 'fixed';
-    confetti.style.left = Math.random() * 100 + '%';
-    confetti.style.top = '-10px';
-    confetti.style.width = (Math.random() * 10 + 5) + 'px';
-    confetti.style.height = (Math.random() * 10 + 5) + 'px';
-    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    confetti.style.borderRadius = '50%';
-    confetti.style.pointerEvents = 'none';
-    confetti.style.zIndex = '9999';
+    const confetti = document.createElement("div");
+    confetti.style.position = "fixed";
+    confetti.style.left = Math.random() * 100 + "%";
+    confetti.style.top = "-10px";
+    confetti.style.width = Math.random() * 10 + 5 + "px";
+    confetti.style.height = Math.random() * 10 + 5 + "px";
+    confetti.style.backgroundColor =
+      colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.borderRadius = "50%";
+    confetti.style.pointerEvents = "none";
+    confetti.style.zIndex = "9999";
     confetti.style.animation = `confetti ${Math.random() * 1 + 2}s ease-in forwards`;
     document.body.appendChild(confetti);
     setTimeout(() => confetti.remove(), 3000);
@@ -118,6 +119,13 @@ function createConfetti() {
 }
 
 function updateCountdown() {
+  if (!weddingDate) {
+    document.getElementById("cd-days").textContent = "_";
+    document.getElementById("cd-hours").textContent = "_";
+    document.getElementById("cd-min").textContent = "_";
+    return;
+  }
+
   const now = new Date();
   const diff = weddingDate - now;
   if (diff <= 0) {
@@ -244,7 +252,7 @@ form.addEventListener("submit", async (e) => {
     document.getElementById("form-state").style.display = "none";
     document.getElementById("success-state").classList.add("show");
     createConfetti();
-    
+
     // Reset form for potential re-use
     setTimeout(() => {
       form.reset();
@@ -253,7 +261,6 @@ form.addEventListener("submit", async (e) => {
       [optSim, optNao].forEach((o) => o.classList.remove("selected"));
       acompWrap.classList.remove("open");
     }, 1000);
-    
   } catch (err) {
     console.error("Erro ao salvar resposta:", err);
     submitBtn.disabled = false;

@@ -1,6 +1,6 @@
-# Alexandre & Juliana 🤍
+# Alexandre & Julyanna 🤍
 
-Site de confirmação de presença (RSVP) para o casamento de Alexandre e Juliana — 22 de outubro de 2026.
+Site de confirmação de presença (RSVP) para o casamento de Alexandre e Julyanna — data a definir.
 
 ## Sobre
 
@@ -29,4 +29,4 @@ HTML, CSS e JavaScript puros — sem frameworks ou build. Google Apps Script com
 
 ---
 
-Feito com carinho para Alexandre & Juliana 💛
+Feito com carinho para Alexandre & Julyanna 💛
